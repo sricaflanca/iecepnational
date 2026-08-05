@@ -13,6 +13,12 @@ server/.env
 server/.env.*
 !server/.env.example
 iecepnational credentials.txt
+UserList.xlsx
+~$*.xlsx
+~$*.xls
+
+# Build artifacts staged for manual upload (not source)
+dist.zip
 
 # SQLite database (local runtime data, not source)
 server/prisma/*.db
