@@ -1,0 +1,60 @@
+{
+  "name": "Specialization",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "title": "Title"
+    },
+    "specialization": {
+      "type": "string",
+      "enum": [
+        "Telecommunications",
+        "Semiconductor Design",
+        "Broadcast Engineering",
+        "Power Electronics",
+        "IoT & Embedded Systems",
+        "Industrial Automation",
+        "Network Engineering",
+        "Signal Processing",
+        "Renewable Energy",
+        "Biomedical Electronics"
+      ],
+      "default": "Telecommunications",
+      "title": "Specialization"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "Event",
+        "News"
+      ],
+      "default": "Event",
+      "title": "Entry Type"
+    },
+    "date": {
+      "type": "string",
+      "format": "date",
+      "title": "Date"
+    },
+    "location": {
+      "type": "string",
+      "title": "Location"
+    },
+    "description": {
+      "type": "string",
+      "title": "Description"
+    },
+    "image_url": {
+      "type": "string",
+      "title": "Image URL"
+    }
+  },
+  "required": [
+    "title",
+    "specialization",
+    "type",
+    "date",
+    "description"
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "name": "IECEPistle",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "title": "Title"
+    },
+    "issue_number": {
+      "type": "string",
+      "title": "Issue Number"
+    },
+    "date_published": {
+      "type": "string",
+      "format": "date",
+      "title": "Date Published"
+    },
+    "summary": {
+      "type": "string",
+      "title": "Summary"
+    },
+    "content": {
+      "type": "string",
+      "title": "Content"
+    },
+    "file_url": {
+      "type": "string",
+      "title": "Newsletter File URL"
+    }
+  },
+  "required": [
+    "title",
+    "issue_number",
+    "date_published",
+    "summary"
+  ]
+}

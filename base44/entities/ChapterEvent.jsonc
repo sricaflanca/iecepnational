@@ -1,0 +1,33 @@
+{
+  "name": "ChapterEvent",
+  "type": "object",
+  "properties": {
+    "chapter": {
+      "type": "string",
+      "title": "Chapter Name"
+    },
+    "title": {
+      "type": "string",
+      "title": "Event Title"
+    },
+    "date": {
+      "type": "string",
+      "format": "date",
+      "title": "Date"
+    },
+    "location": {
+      "type": "string",
+      "title": "Location"
+    },
+    "description": {
+      "type": "string",
+      "title": "Description"
+    }
+  },
+  "required": [
+    "chapter",
+    "title",
+    "date",
+    "description"
+  ]
+}

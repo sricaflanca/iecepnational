@@ -1,0 +1,34 @@
+{
+  "name": "CorporateMember",
+  "type": "object",
+  "properties": {
+    "company_name": {
+      "type": "string",
+      "title": "Company Name"
+    },
+    "tier": {
+      "type": "string",
+      "enum": [
+        "Platinum",
+        "Gold",
+        "Silver",
+        "Bronze"
+      ],
+      "default": "Silver",
+      "title": "Membership Tier"
+    },
+    "industry": {
+      "type": "string",
+      "title": "Industry"
+    },
+    "description": {
+      "type": "string",
+      "title": "Description"
+    }
+  },
+  "required": [
+    "company_name",
+    "tier",
+    "description"
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "name": "Partner",
+  "type": "object",
+  "properties": {
+    "company_name": {
+      "type": "string",
+      "title": "Partner Name"
+    },
+    "website_url": {
+      "type": "string",
+      "title": "Website URL"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "Industry",
+        "Academe",
+        "Government",
+        "Media",
+        "Technology",
+        "Professional Association"
+      ],
+      "default": "Industry",
+      "title": "Category"
+    },
+    "description": {
+      "type": "string",
+      "title": "Description"
+    },
+    "logo_url": {
+      "type": "string",
+      "title": "Logo URL"
+    }
+  },
+  "required": [
+    "company_name",
+    "website_url",
+    "category",
+    "description"
+  ]
+}

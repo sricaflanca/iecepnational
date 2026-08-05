@@ -1,0 +1,42 @@
+{
+  "name": "StudentActivity",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "title": "Activity Title"
+    },
+    "school": {
+      "type": "string",
+      "title": "School / University"
+    },
+    "date": {
+      "type": "string",
+      "format": "date",
+      "title": "Date"
+    },
+    "description": {
+      "type": "string",
+      "title": "Description"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "Competition",
+        "Seminar",
+        "Outreach",
+        "Workshop",
+        "Recognition"
+      ],
+      "default": "Seminar",
+      "title": "Category"
+    }
+  },
+  "required": [
+    "title",
+    "school",
+    "date",
+    "description",
+    "category"
+  ]
+}

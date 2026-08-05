@@ -1,0 +1,39 @@
+{
+  "name": "Member",
+  "type": "object",
+  "properties": {
+    "full_name": {
+      "type": "string",
+      "title": "Full Name"
+    },
+    "license_number": {
+      "type": "string",
+      "title": "PRC License Number"
+    },
+    "membership_status": {
+      "type": "string",
+      "enum": [
+        "Active",
+        "Inactive",
+        "Lifetime",
+        "Fellow"
+      ],
+      "default": "Active",
+      "title": "Membership Status"
+    },
+    "chapter": {
+      "type": "string",
+      "title": "Chapter"
+    },
+    "specialization": {
+      "type": "string",
+      "title": "Specialization"
+    }
+  },
+  "required": [
+    "full_name",
+    "license_number",
+    "membership_status",
+    "chapter"
+  ]
+}

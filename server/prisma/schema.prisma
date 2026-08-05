@@ -1,0 +1,146 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// Auth only — not exposed to the frontend via the generic entities API.
+// Accounts are admin-created only (no public self-registration). A user can
+// hold multiple roles; see server/src/lib/roles.js for the role catalog and
+// which role gates which content entity.
+model User {
+  id                   String    @id @default(cuid())
+  email                String    @unique
+  passwordHash         String
+  roles                String    @default("[]") // JSON-encoded string[]
+  resetToken           String?
+  resetTokenExpiresAt  DateTime?
+  createdAt            DateTime  @default(now())
+}
+
+// Field names below are snake_case to match base44/entities/*.jsonc exactly,
+// so the generic entities API can pass Prisma rows straight through to the
+// frontend with no field-name translation layer.
+
+model ChapterEvent {
+  id           String   @id @default(cuid())
+  chapter      String
+  title        String
+  date         String
+  location     String?
+  description  String
+  created_date DateTime @default(now())
+}
+
+model CorporateMember {
+  id           String   @id @default(cuid())
+  company_name String
+  tier         String   @default("Silver")
+  industry     String?
+  description  String
+  created_date DateTime @default(now())
+}
+
+model Event {
+  id           String   @id @default(cuid())
+  title        String
+  start_date   String
+  end_date     String?
+  location     String
+  description  String
+  type         String   @default("Seminar")
+  image_url    String?
+  created_date DateTime @default(now())
+}
+
+model IECEPistle {
+  id             String   @id @default(cuid())
+  title          String
+  issue_number   String
+  date_published String
+  summary        String
+  content        String?
+  file_url       String?
+  created_date   DateTime @default(now())
+}
+
+model Member {
+  id                 String   @id @default(cuid())
+  full_name          String
+  license_number     String
+  membership_status  String   @default("Active")
+  chapter            String
+  specialization     String?
+  created_date       DateTime @default(now())
+}
+
+model Partner {
+  id           String   @id @default(cuid())
+  company_name String
+  website_url  String
+  category     String   @default("Industry")
+  description  String
+  logo_url     String?
+  created_date DateTime @default(now())
+}
+
+model Resolution {
+  id                 String   @id @default(cuid())
+  resolution_number  String
+  title              String
+  date_issued        String
+  category           String   @default("Board Resolution")
+  summary            String
+  file_url           String?
+  created_date       DateTime @default(now())
+}
+
+model SocialEvent {
+  id           String   @id @default(cuid())
+  title        String
+  date         String
+  location     String?
+  description  String
+  club         String   @default("Fellowship")
+  created_date DateTime @default(now())
+}
+
+model Specialization {
+  id             String   @id @default(cuid())
+  title          String
+  specialization String   @default("Telecommunications")
+  type           String   @default("Event")
+  date           String
+  location       String?
+  description    String
+  image_url      String?
+  created_date   DateTime @default(now())
+}
+
+model StudentActivity {
+  id           String   @id @default(cuid())
+  title        String
+  school       String
+  date         String
+  description  String
+  category     String   @default("Seminar")
+  created_date DateTime @default(now())
+}
+
+model BoardMember {
+  id           String   @id @default(cuid())
+  name         String
+  role         String
+  created_date DateTime @default(now())
+}
+
+// Singleton row (id is always "singleton") holding one-off About-page
+// settings that aren't a list of records — currently just the image next
+// to the Leadership section.
+model AboutSettings {
+  id                    String  @id @default("singleton")
+  leadership_image_url  String?
+}

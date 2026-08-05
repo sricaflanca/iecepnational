@@ -1,0 +1,34 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+dist-ssr/
+
+# Secrets — never commit real credentials
+.env
+.env.*
+!.env.example
+server/.env
+server/.env.*
+!server/.env.example
+iecepnational credentials.txt
+
+# SQLite database (local runtime data, not source)
+server/prisma/*.db
+server/prisma/*.db-journal
+
+# Uploaded files (runtime data, not source)
+server/uploads/*
+!server/uploads/.gitkeep
+
+# Claude Code local settings (machine-specific)
+.claude/settings.local.json
+
+# Editor / OS
+.DS_Store
+Thumbs.db
+*.local
+
+# Logs
+npm-debug.log*

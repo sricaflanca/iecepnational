@@ -1,0 +1,46 @@
+{
+  "name": "Resolution",
+  "type": "object",
+  "properties": {
+    "resolution_number": {
+      "type": "string",
+      "title": "Resolution Number"
+    },
+    "title": {
+      "type": "string",
+      "title": "Title"
+    },
+    "date_issued": {
+      "type": "string",
+      "format": "date",
+      "title": "Date Issued"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "Board Resolution",
+        "Administrative",
+        "Policy",
+        "Ethics",
+        "Election"
+      ],
+      "default": "Board Resolution",
+      "title": "Category"
+    },
+    "summary": {
+      "type": "string",
+      "title": "Summary"
+    },
+    "file_url": {
+      "type": "string",
+      "title": "Document URL"
+    }
+  },
+  "required": [
+    "resolution_number",
+    "title",
+    "date_issued",
+    "category",
+    "summary"
+  ]
+}

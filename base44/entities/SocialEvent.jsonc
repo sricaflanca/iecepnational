@@ -1,0 +1,40 @@
+{
+  "name": "SocialEvent",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "title": "Event Title"
+    },
+    "date": {
+      "type": "string",
+      "format": "date",
+      "title": "Date"
+    },
+    "location": {
+      "type": "string",
+      "title": "Location"
+    },
+    "description": {
+      "type": "string",
+      "title": "Description"
+    },
+    "club": {
+      "type": "string",
+      "enum": [
+        "Sports",
+        "Arts & Culture",
+        "Outreach",
+        "Fellowship",
+        "Other"
+      ],
+      "default": "Fellowship",
+      "title": "Club / Category"
+    }
+  },
+  "required": [
+    "title",
+    "date",
+    "description"
+  ]
+}
