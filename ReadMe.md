@@ -1,77 +1,80 @@
-# Base44 Project
+# IECEP National
 
-Use this repository to run and edit the app locally, then publish changes back through Base44.
+Website for the Institute of Electronics Engineers of the Philippines. React + Vite frontend, with a self-hosted Express + Prisma + PostgreSQL backend (see [`server/`](server/)) — no external platform dependency.
 
-Any change pushed to the repo will also be reflected in the Base44 Builder.
+## Stack
+
+- **Frontend**: React 18, Vite, Tailwind CSS, React Router
+- **Backend**: Express, Prisma ORM, PostgreSQL
+- **Auth**: JWT, email/password, role-based staff accounts (no public self-registration — accounts are created by an admin from the dashboard's Staff Access tab)
+- **File uploads**: stored on local disk under `server/uploads/`, served statically by the API
 
 ## Prerequisites
 
-1. Clone the repository using the project's Git URL.
-2. Navigate to the project directory.
-3. Install dependencies: `npm install`.
-4. Install the Base44 CLI: `npm install -g base44@latest`.
+- **Node.js 18+** (LTS recommended) and npm
+- **PostgreSQL 14+** — either:
+  - A local instance (native install, or via Docker: `docker run -d --name iecep-postgres -e POSTGRES_USER=iecep -e POSTGRES_PASSWORD=<password> -e POSTGRES_DB=iecep -p 5432:5432 -v iecep_pgdata:/var/lib/postgresql/data postgres:16`), or
+  - A managed Postgres (Neon, Supabase, Railway, RDS, etc.) for staging/production
+- **git**
 
-See the [Base44 CLI docs](https://docs.base44.com/developers/references/cli/get-started/overview) if you want to run Base44 commands directly.
+## Setup
+
+1. Clone the repository and `cd` into it.
+2. Install frontend dependencies from the project root:
+   ```bash
+   npm install
+   ```
+3. Install backend dependencies:
+   ```bash
+   npm install --prefix server
+   ```
+4. Configure the backend environment — copy `server/.env.example` to `server/.env` and fill in real values:
+   ```bash
+   DATABASE_URL="postgresql://user:password@localhost:5432/iecep"
+   JWT_SECRET="a long random string"
+   PORT=3001
+   SEED_ADMIN_EMAIL="admin@yourdomain.com"
+   SEED_ADMIN_PASSWORD="a strong password"
+   ```
+5. Run the database migration and seed the initial admin account + starting content:
+   ```bash
+   cd server
+   npx prisma migrate dev
+   npx prisma db seed
+   cd ..
+   ```
 
 ## Run Locally
 
-Run the full local development environment from the project root:
+Start both the frontend and API together from the project root:
 
 ```bash
-base44 dev
+npm run dev:all
 ```
 
-`base44 dev` starts the local Base44 development backend and, when this app is configured for it, also starts the frontend dev server for you. Use the frontend URL printed by the command.
+This runs Vite (`npm run dev`) and the Express API (`npm run server`) concurrently. Open the frontend URL Vite prints (typically `http://localhost:5173`) — it proxies `/api` and `/uploads` requests to the API on port 3001.
 
-For example, when the Base44 project config includes a `serveCommand`, `base44 dev` can launch the frontend too:
-
-```json5
-{
-  "site": {
-    "serveCommand": "npm run dev"
-  }
-}
-```
-
-In a Base44 project this lives in `base44/config.jsonc`.
-
-## Run Only The Frontend
-
-If you only want to work on the frontend against the hosted Base44 backend, run:
+To run them separately:
 
 ```bash
-npm run dev
+npm run dev      # frontend only
+npm run server   # backend only
 ```
 
-Open the local URL printed by Vite.
+## Admin Access
 
-## Use The Hosted Backend
+Log in at `/admin/login` with the `SEED_ADMIN_EMAIL` / `SEED_ADMIN_PASSWORD` from your `server/.env`. From there, use the **Staff Access** tab to create additional logins scoped to specific roles (e.g. a chapter coordinator who can only manage Chapter Corner content).
 
-For frontend-only development, create or update `.env.local` in the project root:
+## Other Commands
 
 ```bash
-VITE_BASE44_APP_ID=your_app_id
-VITE_BASE44_APP_BASE_URL=https://your-app.base44.app
+npm run lint        # eslint
+npm run typecheck   # tsc
+npm run build        # production frontend build (outputs to dist/)
 ```
 
-`VITE_BASE44_APP_ID` identifies the Base44 app.
+## Deployment Notes
 
-`VITE_BASE44_APP_BASE_URL` tells the Base44 Vite plugin where to send local `/api` requests. Point it at your deployed Base44 app URL when you want the local frontend to use the hosted backend.
-
-When you use `base44 dev`, the command injects the local Base44 values for you, so `.env.local` is mainly needed for frontend-only workflows.
-
-## Publish Your Changes
-
-After pushing your changes to git, open the Base44 dashboard and publish the app:
-
-```bash
-base44 dashboard open
-```
-
-## Docs & Support
-
-Documentation: [https://docs.base44.com/Integrations/Using-GitHub](https://docs.base44.com/Integrations/Using-GitHub)
-
-Base44 CLI command reference: [https://docs.base44.com/developers/references/cli/commands/introduction](https://docs.base44.com/developers/references/cli/commands/introduction)
-
-Support: [https://app.base44.com/support](https://app.base44.com/support)
+- **Database**: point `DATABASE_URL` at your production Postgres instance and run `npx prisma migrate deploy` (not `migrate dev`) as part of your deploy process.
+- **File uploads**: `server/uploads/` must live on **persistent disk** on your host — platforms with ephemeral/rebuilt filesystems (most serverless or container-per-deploy platforms) will lose uploaded files on every deploy or restart. A VPS or any host with a durable disk/volume works.
+- **Secrets**: never commit `server/.env`. Set `JWT_SECRET`, `DATABASE_URL`, and `SEED_ADMIN_*` as environment variables on your host instead.

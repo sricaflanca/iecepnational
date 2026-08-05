@@ -22,8 +22,9 @@ server/prisma/*.db-journal
 server/uploads/*
 !server/uploads/.gitkeep
 
-# Claude Code local settings (machine-specific)
+# Claude Code local settings/runtime state (machine-specific)
 .claude/settings.local.json
+.claude/*.lock
 
 # Editor / OS
 .DS_Store
