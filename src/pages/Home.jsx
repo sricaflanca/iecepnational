@@ -6,6 +6,16 @@ import { Image } from "@/components/ui/image";
 
 const HERO_IMAGE = "https://media.base44.com/images/public/6a71bda7bbd3a6eea5934e04/2a8c5d322_generated_d3b45498.png";
 
+// Sources combined into the homepage "Latest Headlines" ticker. Each item
+// links back to its own section (path) so browsing the ticker leads to the
+// original posting rather than a dead end.
+const FEED_SOURCES = [
+  { entity: "Event", label: "Event", path: "/events", sort: "-start_date", dateKey: "start_date" },
+  { entity: "ChapterEvent", label: "Chapter Corner", path: "/chapter-corner", sort: "-date", dateKey: "date" },
+  { entity: "SocialEvent", label: "Social Clubs", path: "/social-clubs", sort: "-date", dateKey: "date" },
+  { entity: "StudentActivity", label: "Student Corner", path: "/student-corner", sort: "-date", dateKey: "date" },
+];
+
 const QUICK_LINKS = [
   { label: "Events", path: "/events", icon: Calendar, desc: "Upcoming conventions & seminars" },
   { label: "Member Search", path: "/member-search", icon: Search, desc: "Verify member credentials" },
@@ -20,9 +30,22 @@ export default function Home() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    base44.entities.IECEPistle.list("-date_published", 8)
-      .then(setTickerItems)
-      .catch(() => setTickerItems([]));
+    Promise.all(
+      FEED_SOURCES.map(src =>
+        base44.entities[src.entity].list(src.sort, 4)
+          .then(items => items.map(it => ({
+            id: it.id,
+            title: it.title,
+            label: src.label,
+            path: src.path,
+            date: it[src.dateKey],
+          })))
+          .catch(() => [])
+      )
+    ).then(results => {
+      const combined = results.flat().sort((a, b) => (b.date || "").localeCompare(a.date || ""));
+      setTickerItems(combined.slice(0, 8));
+    });
   }, []);
 
   const handleSearch = (e) => {
@@ -31,9 +54,9 @@ export default function Home() {
   };
 
   const tickerList = tickerItems.length > 0 ? tickerItems : [
-    { id: "1", title: "IECEP National Convention 2026 Announced", issue_number: "01" },
-    { id: "2", title: "New Board Resolution on Continuing Professional Development", issue_number: "02" },
-    { id: "3", title: "Student Chapter Excellence Awards Now Open", issue_number: "03" },
+    { id: "1", title: "IECEP National Convention 2026 Announced", label: "Event", path: "/events" },
+    { id: "2", title: "New Chapter Meetup Scheduled", label: "Chapter Corner", path: "/chapter-corner" },
+    { id: "3", title: "Student Chapter Excellence Awards Now Open", label: "Student Corner", path: "/student-corner" },
   ];
 
   return (
@@ -45,21 +68,25 @@ export default function Home() {
           <div className="bg-navy text-signal p-6 md:p-10 lg:p-12 flex flex-col justify-between border-b-2 lg:border-b-0 lg:border-r-2 border-signal/20 relative overflow-hidden">
             <div className="circuit-grid absolute inset-0 opacity-30" />
             <div className="relative z-10">
-              <div className="font-mono text-xs uppercase tracking-widest text-azure mb-2">// IECEPISTLE FEED</div>
+              <div className="font-mono text-xs uppercase tracking-widest text-azure mb-2">// NEWS & EVENTS</div>
               <div className="font-heading text-signal text-2xl md:text-3xl uppercase leading-none">Latest Headlines</div>
             </div>
             <div className="relative z-10 mt-8 h-[280px] overflow-hidden">
               <div className="ticker-track flex-col gap-6">
                 {[...tickerList, ...tickerList].map((item, i) => (
-                  <div key={i} className="border-l-2 border-azure pl-4 py-1">
-                    <div className="font-mono text-[10px] text-azure mb-1">ISSUE #{item.issue_number || "—"}</div>
+                  <Link
+                    key={i}
+                    to={item.path}
+                    className="block border-l-2 border-azure pl-4 py-1 hover:bg-signal/5 transition-colors"
+                  >
+                    <div className="font-mono text-[10px] text-azure mb-1 uppercase">{item.label || "—"}</div>
                     <div className="font-heading text-signal text-base md:text-lg uppercase leading-tight">{item.title}</div>
-                  </div>
+                  </Link>
                 ))}
               </div>
             </div>
-            <Link to="/iecepistle" className="relative z-10 nb-btn bg-azure text-signal px-6 py-3 text-xs self-start mt-8">
-              Read IECEPistle <ArrowRight className="w-4 h-4 ml-2" />
+            <Link to="/events" className="relative z-10 nb-btn bg-azure text-signal px-6 py-3 text-xs self-start mt-8">
+              View All Events <ArrowRight className="w-4 h-4 ml-2" />
             </Link>
           </div>
 
