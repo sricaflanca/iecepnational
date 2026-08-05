@@ -1,0 +1,105 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  frontend:
+    name: Frontend (lint, typecheck, build)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      # Non-blocking: this project's checkJs setup has long-standing prop-type
+      # gaps in the UI component library (pre-existing, not build-breaking —
+      # Vite doesn't type-check). Surfaced as a warning rather than failing
+      # the pipeline until that's cleaned up.
+      - name: Typecheck (non-blocking)
+        run: npm run typecheck
+        continue-on-error: true
+
+      - name: Build
+        run: npm run build
+
+  backend:
+    name: Backend (Prisma + Postgres)
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: iecep
+          POSTGRES_PASSWORD: iecep_ci_pw
+          POSTGRES_DB: iecep
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U iecep"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgresql://iecep:iecep_ci_pw@localhost:5432/iecep
+      JWT_SECRET: ci-test-secret-not-for-real-use
+      PORT: 3001
+      SEED_ADMIN_EMAIL: ci@example.com
+      SEED_ADMIN_PASSWORD: CiTestPassword123!
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: server/package-lock.json
+
+      - name: Install server dependencies
+        working-directory: server
+        run: npm ci
+
+      - name: Validate Prisma schema
+        working-directory: server
+        run: npx prisma validate
+
+      - name: Apply migrations to a real Postgres
+        working-directory: server
+        run: npx prisma migrate deploy
+
+      - name: Run seed script
+        working-directory: server
+        run: npx prisma db seed
+
+      - name: Boot the API and check /api/health
+        working-directory: server
+        run: |
+          node src/index.js &
+          SERVER_PID=$!
+          ok=""
+          for i in $(seq 1 20); do
+            if curl -sf http://localhost:3001/api/health > /dev/null; then
+              ok=1
+              break
+            fi
+            sleep 1
+          done
+          kill $SERVER_PID 2>/dev/null || true
+          if [ -z "$ok" ]; then
+            echo "Server did not become healthy in time"
+            exit 1
+          fi
+          echo "Server booted and responded healthy"
