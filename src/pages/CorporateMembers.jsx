@@ -3,6 +3,8 @@ import { base44 } from "@/api/base44Client";
 import { PageBanner } from "@/pages/About";
 import Badge from "@/components/Badge";
 import { LoadingGrid, EmptyState } from "@/pages/Events";
+import WriteUpDialog, { ReadMoreCue } from "@/components/WriteUpDialog";
+import { useWriteUp, clickableCardProps, CARD_CLICK_CLASSES } from "@/lib/writeUp";
 
 const TIERS = ["All", "Platinum", "Gold", "Silver", "Bronze"];
 
@@ -10,6 +12,7 @@ export default function CorporateMembers() {
   const [members, setMembers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("All");
+  const writeUp = useWriteUp();
 
   useEffect(() => {
     base44.entities.CorporateMember.list("company_name", 100)
@@ -47,17 +50,31 @@ export default function CorporateMembers() {
           ) : (
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {filtered.map(m => (
-                <div key={m.id} className="nb-card nb-card-hover p-6">
+                <div
+                  key={m.id}
+                  className={`nb-card nb-card-hover p-6 ${CARD_CLICK_CLASSES}`}
+                  {...clickableCardProps(() => writeUp.show(m))}
+                >
                   <Badge variant={m.tier}>{m.tier} Member</Badge>
                   <h3 className="font-heading text-graphite text-lg uppercase leading-tight mt-3">{m.company_name}</h3>
                   {m.industry && <div className="font-mono text-[10px] text-muted-foreground uppercase mt-1">{m.industry}</div>}
-                  <p className="mt-3 text-sm text-muted-foreground">{m.description}</p>
+                  <p className="mt-3 text-sm text-muted-foreground line-clamp-3">{m.description}</p>
+                  <ReadMoreCue />
                 </div>
               ))}
             </div>
           )}
         </div>
       </section>
+
+      <WriteUpDialog
+        open={writeUp.open}
+        onClose={writeUp.close}
+        badges={writeUp.item && <Badge variant={writeUp.item.tier}>{writeUp.item.tier} Member</Badge>}
+        title={writeUp.item?.company_name}
+        meta={writeUp.item ? [{ text: writeUp.item.industry }] : []}
+        body={writeUp.item?.description}
+      />
     </div>
   );
 }

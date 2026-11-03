@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { base44 } from "@/api/base44Client";
 import { ExternalLink } from "lucide-react";
 import { PageBanner } from "@/pages/About";
@@ -8,6 +8,16 @@ export default function IECEPistle() {
   const [issues, setIssues] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState(null);
+  const featuredRef = useRef(null);
+
+  // On narrow screens the featured issue sits above the archive, so bring it
+  // into view when another issue is picked from the list below.
+  const selectIssue = (issue) => {
+    setSelected(issue);
+    if (window.matchMedia("(max-width: 1023px)").matches) {
+      featuredRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
 
   useEffect(() => {
     base44.entities.IECEPistle.list("-date_published", 50)
@@ -33,16 +43,16 @@ export default function IECEPistle() {
             <div className="grid lg:grid-cols-3 gap-6">
               {/* Featured issue */}
               {selected && (
-                <div className="lg:col-span-2 nb-card p-6 md:p-8">
+                <div ref={featuredRef} className="lg:col-span-2 nb-card p-6 md:p-8 scroll-mt-24">
                   <div className="font-mono text-xs uppercase tracking-widest text-azure mb-3">// FEATURED ISSUE</div>
                   <div className="flex items-center gap-3 mb-4">
                     <span className="font-mono text-xs bg-navy text-signal px-2 py-1">ISSUE #{selected.issue_number}</span>
                     <span className="font-mono text-[10px] text-muted-foreground uppercase">{formatDate(selected.date_published)}</span>
                   </div>
                   <h2 className="font-heading text-graphite text-2xl md:text-3xl uppercase leading-tight">{selected.title}</h2>
-                  <p className="mt-4 text-muted-foreground text-base md:text-lg">{selected.summary}</p>
+                  <p className="mt-4 text-muted-foreground text-base md:text-lg whitespace-pre-line break-words">{selected.summary}</p>
                   {selected.content && (
-                    <div className="mt-6 border-l-2 border-azure pl-4 text-sm text-muted-foreground max-h-[300px] overflow-y-auto">
+                    <div className="mt-6 border-l-2 border-azure pl-4 text-base text-muted-foreground whitespace-pre-line break-words">
                       {selected.content}
                     </div>
                   )}
@@ -61,7 +71,7 @@ export default function IECEPistle() {
                   {issues.map(issue => (
                     <button
                       key={issue.id}
-                      onClick={() => setSelected(issue)}
+                      onClick={() => selectIssue(issue)}
                       className={`w-full text-left border-2 p-4 transition-all ${
                         selected?.id === issue.id
                           ? "bg-navy text-signal border-graphite nb-shadow"

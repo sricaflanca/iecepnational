@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Search, Download } from "lucide-react";
+import { Search, Download, Calendar } from "lucide-react";
 import { PageBanner } from "@/pages/About";
 import Badge from "@/components/Badge";
 import { LoadingGrid, EmptyState } from "@/pages/Events";
+import WriteUpDialog, { ReadMoreCue } from "@/components/WriteUpDialog";
+import { useWriteUp, clickableCardProps, CARD_CLICK_CLASSES } from "@/lib/writeUp";
 
 const CATEGORIES = ["All", "Board Resolution", "Administrative", "Policy", "Ethics", "Election"];
 
@@ -12,6 +14,7 @@ export default function Resolutions() {
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState("All");
+  const writeUp = useWriteUp();
 
   useEffect(() => {
     base44.entities.Resolution.list("-date_issued", 100)
@@ -69,7 +72,11 @@ export default function Resolutions() {
           ) : (
             <div className="space-y-3">
               {filtered.map(res => (
-                <div key={res.id} className="nb-card nb-card-hover flex flex-col md:flex-row">
+                <div
+                  key={res.id}
+                  className={`nb-card nb-card-hover flex flex-col md:flex-row ${CARD_CLICK_CLASSES}`}
+                  {...clickableCardProps(() => writeUp.show(res))}
+                >
                   <div className="bg-navy text-signal p-4 md:w-56 border-b-2 md:border-b-0 md:border-r-2 border-graphite flex flex-col justify-center">
                     <div className="font-mono text-[10px] uppercase tracking-widest text-azure mb-1">Resolution No.</div>
                     <div className="font-heading text-lg uppercase break-all">{res.resolution_number}</div>
@@ -78,9 +85,16 @@ export default function Resolutions() {
                   <div className="p-5 flex-1">
                     <div className="mb-2"><Badge variant="Active">{res.category}</Badge></div>
                     <h3 className="font-heading text-graphite text-lg uppercase leading-tight">{res.title}</h3>
-                    <p className="mt-2 text-sm text-muted-foreground">{res.summary}</p>
+                    <p className="mt-2 text-sm text-muted-foreground line-clamp-3">{res.summary}</p>
+                    <ReadMoreCue />
                     {res.file_url && (
-                      <a href={res.file_url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 mt-3 font-mono text-xs uppercase text-azure hover:underline underline-offset-4">
+                      <a
+                        href={res.file_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={(e) => e.stopPropagation()}
+                        className="inline-flex items-center gap-2 mt-3 font-mono text-xs uppercase text-azure hover:underline underline-offset-4"
+                      >
                         <Download className="w-3 h-3" /> Download Document
                       </a>
                     )}
@@ -91,6 +105,29 @@ export default function Resolutions() {
           )}
         </div>
       </section>
+
+      <WriteUpDialog
+        open={writeUp.open}
+        onClose={writeUp.close}
+        badges={writeUp.item && <Badge variant="Active">{writeUp.item.category}</Badge>}
+        title={writeUp.item?.title}
+        meta={writeUp.item ? [
+          { text: `Resolution No. ${writeUp.item.resolution_number}` },
+          { icon: Calendar, text: formatDate(writeUp.item.date_issued) },
+        ] : []}
+        body={writeUp.item?.summary}
+      >
+        {writeUp.item?.file_url && (
+          <a
+            href={writeUp.item.file_url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 mt-6 font-mono text-xs uppercase text-azure hover:underline underline-offset-4"
+          >
+            <Download className="w-3 h-3" /> Download Document
+          </a>
+        )}
+      </WriteUpDialog>
     </div>
   );
 }

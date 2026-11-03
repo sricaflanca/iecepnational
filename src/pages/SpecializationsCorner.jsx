@@ -3,6 +3,8 @@ import { base44 } from "@/api/base44Client";
 import { Image } from "@/components/ui/image";
 import Badge from "@/components/Badge";
 import { Cpu, MapPin, Calendar, Newspaper, Loader2 } from "lucide-react";
+import WriteUpDialog, { ReadMoreCue } from "@/components/WriteUpDialog";
+import { useWriteUp, clickableCardProps, CARD_CLICK_CLASSES } from "@/lib/writeUp";
 
 const SPECIALIZATIONS = [
   "All",
@@ -29,6 +31,7 @@ export default function SpecializationsCorner() {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("All");
   const [typeFilter, setTypeFilter] = useState("All");
+  const writeUp = useWriteUp();
 
   useEffect(() => {
     (async () => {
@@ -119,7 +122,11 @@ export default function SpecializationsCorner() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filtered.map((entry) => (
-              <article key={entry.id} className="nb-card nb-card-hover bg-card flex flex-col">
+              <article
+                key={entry.id}
+                className={`nb-card nb-card-hover bg-card flex flex-col ${CARD_CLICK_CLASSES}`}
+                {...clickableCardProps(() => writeUp.show(entry))}
+              >
                 {entry.image_url ? (
                   <div className="border-b-2 border-foreground h-44 overflow-hidden">
                     <Image src={entry.image_url} fittingType="fill" className="w-full h-full" />
@@ -140,6 +147,7 @@ export default function SpecializationsCorner() {
                   </div>
                   <h3 className="font-heading text-graphite text-lg uppercase leading-tight mb-2">{entry.title}</h3>
                   <p className="text-muted-foreground text-sm flex-1 line-clamp-3">{entry.description}</p>
+                  <ReadMoreCue />
                   <div className="mt-4 pt-3 border-t-2 border-foreground/10 space-y-1">
                     <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-wide text-muted-foreground">
                       <Calendar className="w-3 h-3" /> {formatDate(entry.date)}
@@ -156,6 +164,24 @@ export default function SpecializationsCorner() {
           </div>
         )}
       </section>
+
+      <WriteUpDialog
+        open={writeUp.open}
+        onClose={writeUp.close}
+        badges={writeUp.item && (
+          <>
+            <Badge variant={writeUp.item.type === "News" ? "Active" : "Lifetime"}>{writeUp.item.type}</Badge>
+            <Badge>{writeUp.item.specialization}</Badge>
+          </>
+        )}
+        title={writeUp.item?.title}
+        meta={writeUp.item ? [
+          { icon: Calendar, text: formatDate(writeUp.item.date) },
+          { icon: MapPin, text: writeUp.item.location },
+        ] : []}
+        image={writeUp.item?.image_url}
+        body={writeUp.item?.description}
+      />
     </div>
   );
 }

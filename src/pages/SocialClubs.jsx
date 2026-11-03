@@ -4,6 +4,8 @@ import { Calendar, MapPin } from "lucide-react";
 import { PageBanner } from "@/pages/About";
 import Badge from "@/components/Badge";
 import { LoadingGrid, EmptyState } from "@/pages/Events";
+import WriteUpDialog, { ReadMoreCue } from "@/components/WriteUpDialog";
+import { useWriteUp, clickableCardProps, CARD_CLICK_CLASSES } from "@/lib/writeUp";
 
 const CLUBS = ["All", "Sports", "Arts & Culture", "Outreach", "Fellowship", "Other"];
 
@@ -11,6 +13,7 @@ export default function SocialClubs() {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("All");
+  const writeUp = useWriteUp();
 
   useEffect(() => {
     base44.entities.SocialEvent.list("-date", 50)
@@ -48,7 +51,11 @@ export default function SocialClubs() {
           ) : (
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {filtered.map(evt => (
-                <div key={evt.id} className="nb-card nb-card-hover p-5">
+                <div
+                  key={evt.id}
+                  className={`nb-card nb-card-hover p-5 ${CARD_CLICK_CLASSES}`}
+                  {...clickableCardProps(() => writeUp.show(evt))}
+                >
                   <Badge variant="Active">{evt.club}</Badge>
                   <h3 className="font-heading text-graphite text-lg uppercase leading-tight mt-3">{evt.title}</h3>
                   <div className="flex items-center gap-1 font-mono text-[10px] text-muted-foreground uppercase mt-2">
@@ -59,13 +66,26 @@ export default function SocialClubs() {
                       <MapPin className="w-3 h-3" />{evt.location}
                     </div>
                   )}
-                  <p className="mt-3 text-sm text-muted-foreground">{evt.description}</p>
+                  <p className="mt-3 text-sm text-muted-foreground line-clamp-3">{evt.description}</p>
+                  <ReadMoreCue />
                 </div>
               ))}
             </div>
           )}
         </div>
       </section>
+
+      <WriteUpDialog
+        open={writeUp.open}
+        onClose={writeUp.close}
+        badges={writeUp.item && <Badge variant="Active">{writeUp.item.club}</Badge>}
+        title={writeUp.item?.title}
+        meta={writeUp.item ? [
+          { icon: Calendar, text: formatDate(writeUp.item.date) },
+          { icon: MapPin, text: writeUp.item.location },
+        ] : []}
+        body={writeUp.item?.description}
+      />
     </div>
   );
 }

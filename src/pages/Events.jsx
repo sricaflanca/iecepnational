@@ -3,6 +3,8 @@ import { base44 } from "@/api/base44Client";
 import { Calendar, MapPin } from "lucide-react";
 import { Image } from "@/components/ui/image";
 import { PageBanner } from "@/pages/About";
+import WriteUpDialog, { ReadMoreCue } from "@/components/WriteUpDialog";
+import { useWriteUp, clickableCardProps, CARD_CLICK_CLASSES } from "@/lib/writeUp";
 
 const DEFAULT_IMG = "https://media.base44.com/images/public/6a71bda7bbd3a6eea5934e04/2d6aac08e_generated_fbacca28.png";
 const TYPES = ["All", "National Convention", "Seminar", "Workshop", "Webinar", "Certification", "General Assembly"];
@@ -11,6 +13,7 @@ export default function Events() {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("All");
+  const writeUp = useWriteUp();
 
   useEffect(() => {
     base44.entities.Event.list("-start_date", 50)
@@ -50,7 +53,11 @@ export default function Events() {
           ) : (
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {filtered.map(evt => (
-                <div key={evt.id} className="nb-card nb-card-hover overflow-hidden flex flex-col">
+                <div
+                  key={evt.id}
+                  className={`nb-card nb-card-hover overflow-hidden flex flex-col ${CARD_CLICK_CLASSES}`}
+                  {...clickableCardProps(() => writeUp.show(evt))}
+                >
                   <div className="h-48 border-b-2 border-graphite relative">
                     <Image src={evt.image_url || DEFAULT_IMG} alt={evt.title} className="w-full h-full" fittingType="fill" />
                     <div className="absolute top-0 left-0 bg-azure text-signal font-mono text-[10px] uppercase px-2 py-1 border-r-2 border-b-2 border-graphite">
@@ -66,6 +73,7 @@ export default function Events() {
                       <MapPin className="w-3 h-3" />{evt.location}
                     </div>
                     <p className="mt-3 text-sm text-muted-foreground flex-1 line-clamp-3">{evt.description}</p>
+                    <ReadMoreCue />
                   </div>
                 </div>
               ))}
@@ -73,8 +81,26 @@ export default function Events() {
           )}
         </div>
       </section>
+
+      <WriteUpDialog
+        open={writeUp.open}
+        onClose={writeUp.close}
+        badges={writeUp.item && <span className="bg-azure text-signal font-mono text-[10px] uppercase px-2 py-1 border-2 border-graphite">{writeUp.item.type}</span>}
+        title={writeUp.item?.title}
+        meta={writeUp.item ? [
+          { icon: Calendar, text: formatDateRange(writeUp.item.start_date, writeUp.item.end_date) },
+          { icon: MapPin, text: writeUp.item.location },
+        ] : []}
+        image={writeUp.item?.image_url}
+        body={writeUp.item?.description}
+      />
     </div>
   );
+}
+
+function formatDateRange(start, end) {
+  if (!end || end === start) return formatDate(start);
+  return `${formatDate(start)} – ${formatDate(end)}`;
 }
 
 function formatDate(d) {

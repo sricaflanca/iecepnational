@@ -104,7 +104,7 @@ export default function Partners() {
                 <h3 className="font-heading text-graphite text-lg uppercase leading-tight mb-2 group-hover:text-azure transition-colors">
                   {partner.company_name}
                 </h3>
-                <p className="text-muted-foreground text-sm flex-1 line-clamp-3 mb-4">{partner.description}</p>
+                <p className="text-muted-foreground text-sm flex-1 mb-4 whitespace-pre-line">{partner.description}</p>
                 <div className="mt-auto pt-3 border-t-2 border-foreground/10 flex items-center gap-2 font-mono text-[10px] uppercase tracking-wide text-azure">
                   <ExternalLink className="w-3 h-3" />
                   <span className="truncate">{partner.website_url.replace(/^https?:\/\//, "").replace(/\/$/, "")}</span>
