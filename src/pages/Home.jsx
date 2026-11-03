@@ -100,7 +100,7 @@ export default function Home() {
                 <span className="text-azure block">of the Philippines</span>
               </h1>
               <p className="mt-6 text-muted-foreground text-base md:text-lg max-w-lg">
-                The integrated and accredited professional organization of electronics engineers, advancing technical excellence and nation-building since 1949.
+                The integrated and accredited professional organization of electronics engineers, advancing technical excellence and nation-building since 1950.
               </p>
 
               <form onSubmit={handleSearch} className="mt-8">
